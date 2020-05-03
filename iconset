@@ -1,0 +1,129 @@
+#!/bin/zsh
+#
+#  iconset
+#
+#  Copyright (C) 2020 hohokihai. All rights reserved.
+#
+
+if [ ! -e "/usr/local/bin/convert" ]; then
+	echo "${0#*/}: brew install imagemagick. see https://brew.sh/" >/dev/stderr
+	exit -1
+fi
+if [ ! -e "/usr/local/bin/identify" ]; then
+	echo "${0#*/}: brew install imagemagick. see https://brew.sh/" >/dev/stderr
+	exit -1
+fi
+if [ ! -e "/usr/local/bin/pngquant" ]; then
+	echo "${0#*/}: brew install pngquant. see https://brew.sh/" >/dev/stderr
+	exit -1
+fi
+if [ ! -e "${1}" ]; then
+	echo "${0#*/}: ${1}: No such file" >/dev/stderr
+	exit -1
+fi
+
+if [ $( identify "${1}" 2>/dev/null | grep -c "PNG" ) = "0" ]; then
+	echo "${0#*/}: ${1}: File type must be PNG" >/dev/stderr
+	exit -1
+fi
+if [ $( identify "${1}" 2>/dev/null | grep -c "1024x1024" ) = "0" ]; then
+	echo "${0#*/}: ${1}: Image size must be 1024x1024" >/dev/stderr
+	exit -1
+fi
+if [ $( identify "${1}" 2>/dev/null | grep -c "sRGB" ) = "0" ]; then
+	echo "${0#*/}: ${1}: Color model must be sRGB" >/dev/stderr
+	exit -1
+fi
+
+DIR="${1%.*}.iconset"
+mkdir -p "${DIR}"
+
+NAMES=( 16 32 128 256 512 )
+for NAME in ${NAMES[@]}; do
+	SIZE=$(( ${NAME} * 1 ))
+	convert "${1}" -resize "${SIZE}x${SIZE}" \
+	               -density 72 \
+	               -units PixelsPerInch "${DIR}/icon_${NAME}x${NAME}.png"
+	SIZE=$(( ${NAME} * 2 ))
+	convert "${1}" -resize "${SIZE}x${SIZE}" \
+	               -density 144 \
+	               -units PixelsPerInch "${DIR}/icon_${NAME}x${NAME}@2x.png"
+done
+
+ls "${DIR}" | sort -V | while read NAME; do
+	pngquant -o "${DIR}/${NAME%.png}.new.png" "${DIR}/${NAME}"
+	mv "${DIR}/${NAME%.png}.new.png" "${DIR}/${NAME}"
+done
+
+echo '{
+  "images": [
+    {
+      "filename": "icon_16x16.png",
+      "idiom": "mac",
+      "scale": "1x",
+      "size": "16x16"
+    },
+    {
+      "filename": "icon_16x16@2x.png",
+      "idiom": "mac",
+      "scale": "2x",
+      "size": "16x16"
+    },
+    {
+      "filename": "icon_32x32.png",
+      "idiom": "mac",
+      "scale": "1x",
+      "size": "32x32"
+    },
+    {
+      "filename": "icon_32x32@2x.png",
+      "idiom": "mac",
+      "scale": "2x",
+      "size": "32x32"
+    },
+    {
+      "filename": "icon_128x128.png",
+      "idiom": "mac",
+      "scale": "1x",
+      "size": "128x128"
+    },
+    {
+      "filename": "icon_128x128@2x.png",
+      "idiom": "mac",
+      "scale": "2x",
+      "size": "128x128"
+    },
+    {
+      "filename": "icon_256x256.png",
+      "idiom": "mac",
+      "scale": "1x",
+      "size": "256x256"
+    },
+    {
+      "filename": "icon_256x256@2x.png",
+      "idiom": "mac",
+      "scale": "2x",
+      "size": "256x256"
+    },
+    {
+      "filename": "icon_512x512.png",
+      "idiom": "mac",
+      "scale": "1x",
+      "size": "512x512"
+    },
+    {
+      "filename": "icon_512x512@2x.png",
+      "idiom": "mac",
+      "scale": "2x",
+      "size": "512x512"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}' > "${DIR}/Contents.json"
+
+#iconutil --convert icns "${DIR}"
+
+exit 0
