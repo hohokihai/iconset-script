@@ -41,13 +41,37 @@ mkdir -p "${DIR}"
 NAMES=( 16 32 128 256 512 )
 for NAME in ${NAMES[@]}; do
 	SIZE=$(( ${NAME} * 1 ))
-	convert "${1}" -resize "${SIZE}x${SIZE}" \
-	               -density 72 \
-	               -units PixelsPerInch "${DIR}/icon_${NAME}x${NAME}.png"
+	if [[ ${NAME} == 16 ]]; then
+		RESIZE=$(( ${SIZE} - 1 ))
+		convert "${1}" -resize "${RESIZE}x${RESIZE}" \
+		               -density 72 \
+		               -units PixelsPerInch \
+		               -background none \
+		               -gravity southwest \
+		               -extent "${SIZE}x${SIZE}" \
+		               "${DIR}/icon_${NAME}x${NAME}.png"
+	else
+		convert "${1}" -resize "${SIZE}x${SIZE}" \
+		               -density 72 \
+		               -units PixelsPerInch \
+		               "${DIR}/icon_${NAME}x${NAME}.png"
+	fi
 	SIZE=$(( ${NAME} * 2 ))
-	convert "${1}" -resize "${SIZE}x${SIZE}" \
-	               -density 144 \
-	               -units PixelsPerInch "${DIR}/icon_${NAME}x${NAME}@2x.png"
+	if [[ ${NAME} == 16 ]]; then
+		RESIZE=$(( ${SIZE} - 2 ))
+		convert "${1}" -resize "${RESIZE}x${RESIZE}" \
+		               -density 144 \
+		               -units PixelsPerInch \
+		               -background none \
+		               -gravity southwest \
+		               -extent "${SIZE}x${SIZE}" \
+		               "${DIR}/icon_${NAME}x${NAME}@2x.png"
+	else
+		convert "${1}" -resize "${SIZE}x${SIZE}" \
+		               -density 144 \
+		               -units PixelsPerInch \
+		               "${DIR}/icon_${NAME}x${NAME}@2x.png"
+	fi
 done
 
 ls "${DIR}" | sort -V | while read NAME; do
@@ -56,72 +80,72 @@ ls "${DIR}" | sort -V | while read NAME; do
 done
 
 echo '{
-  "images": [
-    {
-      "filename": "icon_16x16.png",
-      "idiom": "mac",
-      "scale": "1x",
-      "size": "16x16"
-    },
-    {
-      "filename": "icon_16x16@2x.png",
-      "idiom": "mac",
-      "scale": "2x",
-      "size": "16x16"
-    },
-    {
-      "filename": "icon_32x32.png",
-      "idiom": "mac",
-      "scale": "1x",
-      "size": "32x32"
-    },
-    {
-      "filename": "icon_32x32@2x.png",
-      "idiom": "mac",
-      "scale": "2x",
-      "size": "32x32"
-    },
-    {
-      "filename": "icon_128x128.png",
-      "idiom": "mac",
-      "scale": "1x",
-      "size": "128x128"
-    },
-    {
-      "filename": "icon_128x128@2x.png",
-      "idiom": "mac",
-      "scale": "2x",
-      "size": "128x128"
-    },
-    {
-      "filename": "icon_256x256.png",
-      "idiom": "mac",
-      "scale": "1x",
-      "size": "256x256"
-    },
-    {
-      "filename": "icon_256x256@2x.png",
-      "idiom": "mac",
-      "scale": "2x",
-      "size": "256x256"
-    },
-    {
-      "filename": "icon_512x512.png",
-      "idiom": "mac",
-      "scale": "1x",
-      "size": "512x512"
-    },
-    {
-      "filename": "icon_512x512@2x.png",
-      "idiom": "mac",
-      "scale": "2x",
-      "size": "512x512"
-    }
-  ],
-  "info": {
-    "author": "xcode",
-    "version": 1
-  }
+	"images": [
+		{
+			"filename": "icon_16x16.png",
+			"idiom": "mac",
+			"scale": "1x",
+			"size": "16x16"
+		},
+		{
+			"filename": "icon_16x16@2x.png",
+			"idiom": "mac",
+			"scale": "2x",
+			"size": "16x16"
+		},
+		{
+			"filename": "icon_32x32.png",
+			"idiom": "mac",
+			"scale": "1x",
+			"size": "32x32"
+		},
+		{
+			"filename": "icon_32x32@2x.png",
+			"idiom": "mac",
+			"scale": "2x",
+			"size": "32x32"
+		},
+		{
+			"filename": "icon_128x128.png",
+			"idiom": "mac",
+			"scale": "1x",
+			"size": "128x128"
+		},
+		{
+			"filename": "icon_128x128@2x.png",
+			"idiom": "mac",
+			"scale": "2x",
+			"size": "128x128"
+		},
+		{
+			"filename": "icon_256x256.png",
+			"idiom": "mac",
+			"scale": "1x",
+			"size": "256x256"
+		},
+		{
+			"filename": "icon_256x256@2x.png",
+			"idiom": "mac",
+			"scale": "2x",
+			"size": "256x256"
+		},
+		{
+			"filename": "icon_512x512.png",
+			"idiom": "mac",
+			"scale": "1x",
+			"size": "512x512"
+		},
+		{
+			"filename": "icon_512x512@2x.png",
+			"idiom": "mac",
+			"scale": "2x",
+			"size": "512x512"
+		}
+	],
+	"info": {
+		"author": "xcode",
+		"version": 1
+	}
 }' > "${DIR}/Contents.json"
 
 #iconutil --convert icns "${DIR}"
