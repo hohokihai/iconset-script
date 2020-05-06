@@ -42,7 +42,7 @@ NAMES=( 16 32 128 256 512 )
 for NAME in ${NAMES[@]}; do
 	SIZE=$(( ${NAME} * 1 ))
 	if [[ ${NAME} == 16 ]]; then
-		RESIZE=$(( ${SIZE} - 1 ))
+		RESIZE=$(( ${SIZE} - 2 * 1 ))
 		convert "${1}" -resize "${RESIZE}x${RESIZE}" \
 		               -density 72 \
 		               -units PixelsPerInch \
@@ -58,7 +58,7 @@ for NAME in ${NAMES[@]}; do
 	fi
 	SIZE=$(( ${NAME} * 2 ))
 	if [[ ${NAME} == 16 ]]; then
-		RESIZE=$(( ${SIZE} - 2 ))
+		RESIZE=$(( ${SIZE} - 2 * 2 ))
 		convert "${1}" -resize "${RESIZE}x${RESIZE}" \
 		               -density 144 \
 		               -units PixelsPerInch \
